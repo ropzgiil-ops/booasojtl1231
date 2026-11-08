@@ -15,15 +15,17 @@ jobs:
           SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
           mkdir -p Payload/IronLog.app
 
-          cp IronLog/Info.plist Payload/IronLog.app/Info.plist
+          # Копируем Info.plist из корня
+          cp Info.plist Payload/IronLog.app/Info.plist
 
+          # Компилируем Swift файлы напрямую из корня репозитория
           swiftc -sdk "$SDK_PATH" \
                  -target arm64-apple-ios15.0 \
                  -framework UIKit \
                  -framework SwiftUI \
                  -O \
-                 IronLog/App.swift \
-                 IronLog/MainTabView.swift \
+                 App.swift \
+                 MainTabView.swift \
                  -o Payload/IronLog.app/IronLog
 
           chmod +x Payload/IronLog.app/IronLog
