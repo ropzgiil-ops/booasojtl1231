@@ -1,0 +1,36 @@
+name: Build iOS Native IPA
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile Native SwiftUI to Apple Mach-O arm64
+        run: |
+          set -e
+          SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+          mkdir -p Payload/IronLog.app
+
+          cp IronLog/Info.plist Payload/IronLog.app/Info.plist
+
+          swiftc -sdk "$SDK_PATH" \
+                 -target arm64-apple-ios15.0 \
+                 -framework UIKit \
+                 -framework SwiftUI \
+                 -O \
+                 IronLog/App.swift \
+                 IronLog/MainTabView.swift \
+                 -o Payload/IronLog.app/IronLog
+
+          chmod +x Payload/IronLog.app/IronLog
+          zip -r IronLog_DDX.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: IronLog_DDX_IPA
+          path: IronLog_DDX.ipa
